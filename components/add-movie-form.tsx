@@ -96,7 +96,7 @@ export default function AddMovieForm({ onAddMovie }: AddMovieFormProps) {
         className="bg-primary text-primary-foreground px-4 py-2 rounded-md h-10 whitespace-nowrap hover:bg-primary/90 transition-colors"
         disabled={isLoading}
       >
-        {isLoading ? "Adding..." : "Add Movie"}
+        {isLoading ? "Adding..." : "Suggest"}
       </button>
     </form>
   )

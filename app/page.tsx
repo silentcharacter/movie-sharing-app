@@ -102,7 +102,7 @@ export default function Home() {
         suggestedBy: currentUser._id,
       })
       toast.success("Movie added", {
-        description: `${newMovie.title} has been added to your list`,
+        description: `${newMovie.title} has been suggested to your friends`,
       })
     } catch (error) {
       // Check for the specific duplicate movie error - using a more lenient check
@@ -184,7 +184,7 @@ export default function Home() {
       )}
 
       <div className="add-movie-section mt-8 pt-6 border-t border-border">
-        <h3 className="text-lg font-medium mb-4">Add New Movie</h3>
+        <h3 className="text-lg font-medium mb-4">Suggest Movie</h3>
         <AddMovieForm onAddMovie={addMovie} />
       </div>
 
@@ -192,7 +192,7 @@ export default function Home() {
         <button
           onClick={scrollToAddMovie}
           className="fixed bottom-5 right-5 w-14 h-14 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg z-50 transition-transform hover:scale-105"
-          aria-label="Add movie"
+          aria-label="Suggest"
         >
           <Plus size={24} />
         </button>

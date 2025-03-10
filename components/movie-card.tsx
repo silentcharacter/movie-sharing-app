@@ -19,10 +19,9 @@ export default function MovieCard({ movie, onLike, activeSwipeRef }: MovieCardPr
   const [isRemoving, setIsRemoving] = useState(false)
   const startXRef = useRef(0)
   const cardRef = useRef<HTMLDivElement>(null)
-
   // Calculate percentages for likes/dislikes bar
-  const totalVotes = movie.likesCount + movie.dislikesCount
-  const likesPercentage = totalVotes === 0 ? 50 : Math.round((movie.likesCount / totalVotes) * 100)
+  const totalVotes = (movie.likesCount ?? 0) + (movie.dislikesCount ?? 0)
+  const likesPercentage = totalVotes === 0 ? 50 : Math.round(((movie.likesCount ?? 0) / totalVotes) * 100)
   const dislikesPercentage = 100 - likesPercentage
 
   const handleTouchStart = (e: React.TouchEvent) => {
