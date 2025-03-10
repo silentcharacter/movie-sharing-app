@@ -152,10 +152,6 @@ export default function Home() {
     <main className="container mx-auto px-4 py-4 max-w-3xl">
       <h1 className="text-2xl font-bold mb-4 flex justify-between items-center">
         Friends recommendations
-        <span className="text-sm font-normal text-muted-foreground">
-          ({filteredMovies.length}
-          {activeGenre !== "all" ? `/${movies.length}` : ""})
-        </span>
       </h1>
 
       {!isTelegram && (
@@ -164,7 +160,12 @@ export default function Home() {
         </div>
       )}
 
-      <GenreFilter activeGenre={activeGenre} setActiveGenre={setActiveGenre} />
+      <GenreFilter 
+        activeGenre={activeGenre} 
+        setActiveGenre={setActiveGenre}
+        moviesCount={movies.length}
+        filteredMoviesCount={filteredMovies.length}
+      />
 
       <div className="text-center text-muted-foreground text-sm my-2 p-2 bg-muted/20 rounded-lg">
         Swipe right to LIKE, swipe left to DISLIKE

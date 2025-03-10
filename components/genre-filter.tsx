@@ -3,9 +3,16 @@
 interface GenreFilterProps {
   activeGenre: string
   setActiveGenre: (genre: string) => void
+  moviesCount: number
+  filteredMoviesCount: number
 }
 
-export default function GenreFilter({ activeGenre, setActiveGenre }: GenreFilterProps) {
+export default function GenreFilter({ 
+  activeGenre, 
+  setActiveGenre, 
+  moviesCount, 
+  filteredMoviesCount 
+}: GenreFilterProps) {
   const genres = [
     { id: "all", name: "All" },
     { id: "action", name: "Action" },
@@ -28,7 +35,8 @@ export default function GenreFilter({ activeGenre, setActiveGenre }: GenreFilter
           }`}
           onClick={() => setActiveGenre(genre.id)}
         >
-          {genre.name}
+          {genre.name} {genre.id === "all" && moviesCount > 0 && `(${moviesCount})`}
+          {genre.id !== "all" && activeGenre === genre.id && filteredMoviesCount > 0 && `(${filteredMoviesCount})`}
         </button>
       ))}
     </div>

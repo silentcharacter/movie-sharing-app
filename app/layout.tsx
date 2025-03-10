@@ -2,7 +2,7 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
-import { ThemeProvider } from "@/components/theme-provider"
+// import { ThemeProvider } from "@/components/theme-provider"
 import { ConvexClientProvider } from "./provider";
 import { Toaster } from "sonner"
 
@@ -10,8 +10,7 @@ const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: "Movie Sharing Mini App",
-  description: "Share movie recommendations with friends",
-    generator: 'v0.dev'
+  description: "Share movie recommendations with friends"
 }
 
 export default function RootLayout({
