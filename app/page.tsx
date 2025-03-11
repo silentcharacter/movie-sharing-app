@@ -13,14 +13,6 @@ import type { Movie } from "@/lib/types"
 
 export default function Home() {
   // Get current user data
-  const currentUser = useQuery(api.users.getByTelegramId, { telegramId: "123456" })
-  const movies = useQuery(api.movies.getUnratedMovies, 
-    currentUser?._id ? { userId: currentUser._id } : "skip"
-  ) || []
-  const likeMovie = useMutation(api.movies.likeMovie)
-  const [originalMovies, setOriginalMovies] = useState<Movie[]>([])
-  const [activeGenre, setActiveGenre] = useState<string>("all")
-  const [filteredMovies, setFilteredMovies] = useState<Movie[]>([])
   const [isTelegram, setIsTelegram] = useState(false)
   const [telegramUser, setTelegramUser] = useState<any>(null)
   const prevMoviesRef = useRef<Movie[]>([])
@@ -28,6 +20,22 @@ export default function Home() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const router = useRouter()
   const pathname = usePathname()
+  
+  // Update currentUser query to use telegramUser.id after it's available
+  const currentUser = useQuery(
+    api.users.getByTelegramId, 
+    telegramUser ? { telegramId: telegramUser.id.toString() } : "skip"
+  )
+  
+  
+  const movies = useQuery(api.movies.getUnratedMovies, 
+    currentUser?._id ? { userId: currentUser._id } : "skip"
+  ) || []
+  
+  const likeMovie = useMutation(api.movies.likeMovie)
+  const [originalMovies, setOriginalMovies] = useState<Movie[]>([])
+  const [activeGenre, setActiveGenre] = useState<string>("all")
+  const [filteredMovies, setFilteredMovies] = useState<Movie[]>([])
   
   // Initialize originalMovies only once when movies are first loaded
   useEffect(() => {
@@ -37,6 +45,8 @@ export default function Home() {
   }, [movies, originalMovies.length])
 
   useEffect(() => {
+    setIsTelegram(false)
+    setTelegramUser({id: "123456", first_name: "Anonymous", last_name: "", username: "@anonymous"})
     // Check if running in Telegram WebApp
     if (typeof window !== "undefined" && window.Telegram && window.Telegram.WebApp) {
       setIsTelegram(true)
@@ -141,14 +151,15 @@ export default function Home() {
         </div>
       )}
 
-      {isTelegram && telegramUser && (
+      {/* TG user info for debugging */}
+      {/* {isTelegram && telegramUser && (
         <div className="bg-blue-50 text-blue-800 p-3 rounded-lg mb-4">
           <h3 className="font-medium">Telegram User Info:</h3>
           <p>ID: {telegramUser.id}</p>
           <p>Name: {telegramUser.first_name} {telegramUser.last_name || ''}</p>
           {telegramUser.username && <p>Username: @{telegramUser.username}</p>}
         </div>
-      )}
+      )} */}
 
       <GenreFilter 
         activeGenre={activeGenre} 
