@@ -77,7 +77,7 @@ export default function AddMovieForm({ onAddMovie }: AddMovieFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-2">
+    <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-2 pb-8">
       <div className="flex-1">
         <input
           type="url"
