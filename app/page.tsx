@@ -9,6 +9,7 @@ import { useQuery, useMutation } from "convex/react"
 import { api } from "@/convex/_generated/api"
 import { Plus, Menu, ChevronLeft } from "lucide-react"
 import { toast } from "sonner"
+import type { Movie } from "@/lib/types"
 
 export default function Home() {
   // Get current user data
