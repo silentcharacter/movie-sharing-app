@@ -149,7 +149,7 @@ export default function Home() {
       {filteredMovies.length === 0 ? (
         <div className="text-center py-10 text-muted-foreground">
           <p>
-            {activeGenre !== "all" ? `No movies found in the "${activeGenre}" genre` : "No more movies in your list"}
+            {activeGenre !== "all" ? `No movies found in the "${activeGenre}" genre` : "No more recommendations"}
           </p>
         </div>
       ) : (

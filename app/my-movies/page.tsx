@@ -21,10 +21,9 @@ export default function MyMovies() {
 
   const [activeGenre, setActiveGenre] = useState<string>("all")
   const [filteredMovies, setFilteredMovies] = useState<Movie[]>([])
-  const [showFab, setShowFab] = useState(true)
+  const activeSwipeRef = useRef<string | null>(null)
   const prevMoviesRef = useRef<Movie[]>([])
   const prevActiveGenreRef = useRef<string>("all")
-  const activeSwipeRef = useRef<string | null>(null)
 
   // Update filtered movies when movies or activeGenre change
   useEffect(() => {
@@ -80,22 +79,6 @@ export default function MyMovies() {
     }
   }
 
-  useEffect(() => {
-    const handleScroll = () => {
-      const addMovieSection = document.querySelector(".add-movie-section")
-      if (addMovieSection) {
-        const rect = addMovieSection.getBoundingClientRect()
-        const isPartiallyVisible = rect.top < window.innerHeight && rect.bottom > 0
-        setShowFab(!isPartiallyVisible)
-      }
-    }
-
-    window.addEventListener("scroll", handleScroll, { passive: true })
-    handleScroll() // Check initial state
-
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
-
   const scrollToAddMovie = () => {
     const addMovieSection = document.querySelector(".add-movie-section")
     if (addMovieSection) {
@@ -109,16 +92,27 @@ export default function MyMovies() {
 
   return (
     <main className="container mx-auto px-4 py-4 max-w-3xl">
-      <h1 className="text-2xl font-bold mb-4 flex items-center gap-4">
-        <button 
-          onClick={() => router.push("/")}
-          className="p-2 hover:bg-accent rounded-full"
-          aria-label="Go back"
-        >
-          <ChevronLeft size={24} />
-        </button>
-        <span>My Movies</span>
-      </h1>
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-2xl font-bold flex items-center gap-4">
+          <button 
+            onClick={() => router.push("/")}
+            className="p-2 hover:bg-accent rounded-full"
+            aria-label="Go back"
+          >
+            <ChevronLeft size={24} />
+          </button>
+          <span>My Movies</span>
+        </h1>
+      </div>
+
+      {/* Floating Plus button that stays visible during scrolling */}
+      <button
+        onClick={scrollToAddMovie}
+        className="fixed top-4 right-4 md:right-8 p-3 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg z-50 transition-transform hover:scale-105"
+        aria-label="Suggest movie"
+      >
+        <Plus size={24} />
+      </button>
 
       {myMovies.length === 0 ? (
         <p className="text-muted-foreground text-center py-8">
@@ -151,16 +145,6 @@ export default function MyMovies() {
         <h3 className="text-lg font-medium mb-4">Suggest Movie</h3>
         <AddMovieForm onAddMovie={addMovie} />
       </div>
-
-      {showFab && (
-        <button
-          onClick={scrollToAddMovie}
-          className="fixed bottom-5 right-5 w-14 h-14 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg z-50 transition-transform hover:scale-105"
-          aria-label="Suggest"
-        >
-          <Plus size={24} />
-        </button>
-      )}
     </main>
   )
 } 

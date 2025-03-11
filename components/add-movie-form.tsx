@@ -87,6 +87,15 @@ export default function AddMovieForm({ onAddMovie }: AddMovieFormProps) {
           placeholder="IMDb URL (e.g. https://www.imdb.com/title/tt0062455)"
           className="w-full h-10 px-3 py-2 border border-input rounded-md bg-background"
           required
+          readOnly
+          onClick={(e) => {
+            // Make the input editable when clicked
+            e.currentTarget.readOnly = false;
+          }}
+          onBlur={(e) => {
+            // Make it readonly again when focus is lost
+            e.currentTarget.readOnly = true;
+          }}
         />
         <div className="text-xs text-muted-foreground mt-1">Paste the full IMDb movie URL</div>
       </div>
