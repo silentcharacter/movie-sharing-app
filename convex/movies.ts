@@ -143,10 +143,12 @@ export const listLikedByUser = query({
     const { userId } = args;
     if (!userId) return [];
     
-    // First get all the user's likes
+    // Get all the user's positive likes using the new index
     const likes = await ctx.db
       .query("likes")
-      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .withIndex("by_user_positive", (q) => 
+        q.eq("userId", userId).eq("positive", true)
+      )
       .collect();
     
     // Get the movie IDs from the likes

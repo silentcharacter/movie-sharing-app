@@ -35,5 +35,6 @@ export default defineSchema({
     createdAt: v.optional(v.number()),
   })
     .index("by_user", ["userId"])
-    .index("by_movie", ["movieId"]),
+    .index("by_movie", ["movieId"])
+    .index("by_user_positive", ["userId", "positive"]),
 });

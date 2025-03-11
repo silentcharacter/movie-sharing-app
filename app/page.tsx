@@ -218,9 +218,6 @@ export default function Home() {
           <p>
             {activeGenre !== "all" ? `No movies found in the "${activeGenre}" genre` : "No more movies in your list"}
           </p>
-          <button onClick={resetMovieList} className="mt-5 bg-primary text-primary-foreground px-4 py-2 rounded-md">
-            Reset List
-          </button>
         </div>
       ) : (
         <MovieList movies={filteredMovies} onLikeMovie={onLikeMovie} />
