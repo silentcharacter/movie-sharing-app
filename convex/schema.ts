@@ -32,8 +32,8 @@ export default defineSchema({
     userId: v.id("users"),
     movieId: v.id("movies"),
     positive: v.boolean(),
+    createdAt: v.optional(v.number()),
   })
-    .index("by_userId", ["userId"])
-    .index("by_movieId", ["movieId"])
-    .index("by_userId_and_movieId", ["userId", "movieId"])
+    .index("by_user", ["userId"])
+    .index("by_movie", ["movieId"]),
 });

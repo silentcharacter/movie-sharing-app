@@ -5,10 +5,12 @@ import MovieList from "@/components/movie-list"
 import GenreFilter from "@/components/genre-filter"
 import AddMovieForm from "@/components/add-movie-form"
 import type { Movie } from "@/lib/types"
-import { Plus } from "lucide-react"
+import { Plus, Menu, ChevronLeft } from "lucide-react"
 import { toast } from "sonner"
 import { useQuery, useMutation } from "convex/react"
 import { api } from "@/convex/_generated/api"
+import Link from "next/link"
+import { useRouter, usePathname } from "next/navigation"
 
 export default function Home() {
   // Get current user data
@@ -24,6 +26,9 @@ export default function Home() {
   const [isTelegram, setIsTelegram] = useState(false)
   const prevMoviesRef = useRef<Movie[]>([])
   const prevActiveGenreRef = useRef<string>("all")
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const router = useRouter()
+  const pathname = usePathname()
   
   // Initialize originalMovies only once when movies are first loaded
   useEffect(() => {
@@ -151,7 +156,44 @@ export default function Home() {
   return (
     <main className="container mx-auto px-4 py-4 max-w-3xl">
       <h1 className="text-2xl font-bold mb-4 flex justify-between items-center">
-        Friends recommendations
+        {pathname !== "/" && (
+          <button 
+            onClick={() => router.push("/")}
+            className="p-2 hover:bg-accent rounded-full"
+          >
+            <ChevronLeft size={24} />
+          </button>
+        )}
+        <span>Friends recommendations</span>
+        <div className="relative">
+          <button 
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="p-2 hover:bg-accent rounded-full"
+          >
+            <Menu size={24} />
+          </button>
+          
+          {isMenuOpen && (
+            <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-popover border border-border">
+              <div className="py-1">
+                <Link 
+                  href="/my-likes"
+                  className="block px-4 py-2 text-sm hover:bg-accent"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  My Likes
+                </Link>
+                <Link 
+                  href="/my-movies"
+                  className="block px-4 py-2 text-sm hover:bg-accent"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  My Movies
+                </Link>
+              </div>
+            </div>
+          )}
+        </div>
       </h1>
 
       {!isTelegram && (

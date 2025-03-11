@@ -111,7 +111,7 @@ export const getUnratedMovies = query({
     // Get all likes for this user
     const userLikes = await ctx.db
       .query("likes")
-      .withIndex("by_userId", (q) => q.eq("userId", args.userId))
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
       .collect();
     
     // Create a set of movieIds that the user has rated
@@ -119,5 +119,48 @@ export const getUnratedMovies = query({
     
     // Filter out movies that the user has already rated
     return allMovies.filter(movie => !ratedMovieIds.has(movie._id));
+  },
+});
+
+// Get movies suggested by a specific user
+export const listByUser = query({
+  args: { userId: v.id("users") },
+  handler: async (ctx, args) => {
+    const { userId } = args;
+    if (!userId) return [];
+    
+    return await ctx.db
+      .query("movies")
+      .filter((q) => q.eq(q.field("suggestedBy"), userId))
+      .collect();
+  },
+});
+
+// Get movies liked by a specific user
+export const listLikedByUser = query({
+  args: { userId: v.id("users") },
+  handler: async (ctx, args) => {
+    const { userId } = args;
+    if (!userId) return [];
+    
+    // First get all the user's likes
+    const likes = await ctx.db
+      .query("likes")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .collect();
+    
+    // Get the movie IDs from the likes
+    const movieIds = likes.map(like => like.movieId);
+    
+    // No likes? Return empty array
+    if (movieIds.length === 0) return [];
+    
+    // Get all the movies that match these IDs
+    const movies = await Promise.all(
+      movieIds.map(id => ctx.db.get(id))
+    );
+    
+    // Filter out any null values (in case a movie was deleted)
+    return movies.filter(movie => movie !== null);
   },
 }); 
