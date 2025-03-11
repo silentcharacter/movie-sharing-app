@@ -3,14 +3,12 @@
 import { useEffect, useState, useRef } from "react"
 import MovieList from "@/components/movie-list"
 import GenreFilter from "@/components/genre-filter"
-import AddMovieForm from "@/components/add-movie-form"
-import type { Movie } from "@/lib/types"
-import { Plus, Menu, ChevronLeft } from "lucide-react"
-import { toast } from "sonner"
-import { useQuery, useMutation } from "convex/react"
-import { api } from "@/convex/_generated/api"
 import Link from "next/link"
 import { useRouter, usePathname } from "next/navigation"
+import { useQuery, useMutation } from "convex/react"
+import { api } from "@/convex/_generated/api"
+import { Plus, Menu, ChevronLeft } from "lucide-react"
+import { toast } from "sonner"
 
 export default function Home() {
   // Get current user data
@@ -19,7 +17,6 @@ export default function Home() {
     currentUser?._id ? { userId: currentUser._id } : "skip"
   ) || []
   const likeMovie = useMutation(api.movies.likeMovie)
-  const addNewMovie = useMutation(api.movies.add)
   const [originalMovies, setOriginalMovies] = useState<Movie[]>([])
   const [activeGenre, setActiveGenre] = useState<string>("all")
   const [filteredMovies, setFilteredMovies] = useState<Movie[]>([])
@@ -88,71 +85,6 @@ export default function Home() {
     }
   }
 
-  const addMovie = async (newMovie: Movie) => {
-    try {
-      if (!currentUser) {
-        throw new Error("User not found")
-      }
-      
-      await addNewMovie({
-        imdbID: newMovie.imdbID,
-        title: newMovie.title,
-        year: newMovie.year,
-        genre: newMovie.genre,
-        description: newMovie.description,
-        likesCount: 1,
-        dislikesCount: 0,
-        poster: newMovie.poster,
-        imdbRating: newMovie.imdbRating,
-        suggestedBy: currentUser._id,
-      })
-      toast.success("Movie added", {
-        description: `${newMovie.title} has been suggested to your friends`,
-      })
-    } catch (error) {
-      // Check for the specific duplicate movie error - using a more lenient check
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      if (errorMessage.toLowerCase().includes("already exists")) {
-        toast.error("Movie already exists", {
-          description: `${newMovie.title} was already suggested before`,
-        })
-      } else {
-        toast.error("Failed to add movie", {
-          description: error instanceof Error ? error.message : "An error occurred",
-        })
-      }
-    }
-  }
-
-  const [showFab, setShowFab] = useState(true)
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const addMovieSection = document.querySelector(".add-movie-section")
-      if (addMovieSection) {
-        const rect = addMovieSection.getBoundingClientRect()
-        const isPartiallyVisible = rect.top < window.innerHeight && rect.bottom > 0
-        setShowFab(!isPartiallyVisible)
-      }
-    }
-
-    window.addEventListener("scroll", handleScroll, { passive: true })
-    handleScroll() // Check initial state
-
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
-
-  const scrollToAddMovie = () => {
-    const addMovieSection = document.querySelector(".add-movie-section")
-    if (addMovieSection) {
-      addMovieSection.scrollIntoView({ behavior: "smooth" })
-      setTimeout(() => {
-        const input = document.getElementById("imdbUrl")
-        if (input) input.focus()
-      }, 500)
-    }
-  }
-
   return (
     <main className="container mx-auto px-4 py-4 max-w-3xl">
       <h1 className="text-2xl font-bold mb-4 flex justify-between items-center">
@@ -177,18 +109,18 @@ export default function Home() {
             <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-popover border border-border">
               <div className="py-1">
                 <Link 
-                  href="/my-likes"
-                  className="block px-4 py-2 text-sm hover:bg-accent"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  My Likes
-                </Link>
-                <Link 
                   href="/my-movies"
                   className="block px-4 py-2 text-sm hover:bg-accent"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   My Movies
+                </Link>
+                <Link 
+                  href="/my-likes"
+                  className="block px-4 py-2 text-sm hover:bg-accent"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  My Likes
                 </Link>
               </div>
             </div>
@@ -221,21 +153,6 @@ export default function Home() {
         </div>
       ) : (
         <MovieList movies={filteredMovies} onLikeMovie={onLikeMovie} />
-      )}
-
-      <div className="add-movie-section mt-8 pt-6 border-t border-border">
-        <h3 className="text-lg font-medium mb-4">Suggest Movie</h3>
-        <AddMovieForm onAddMovie={addMovie} />
-      </div>
-
-      {showFab && (
-        <button
-          onClick={scrollToAddMovie}
-          className="fixed bottom-5 right-5 w-14 h-14 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg z-50 transition-transform hover:scale-105"
-          aria-label="Suggest"
-        >
-          <Plus size={24} />
-        </button>
       )}
     </main>
   )
