@@ -2,16 +2,18 @@
 
 import { ChevronLeft } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { useQuery } from "convex/react"
+import { useQuery, useMutation } from "convex/react"
 import { api } from "@/convex/_generated/api"
 import MovieCard from "@/components/movie-card"
 import GenreFilter from "@/components/genre-filter"
 import { useState, useEffect, useRef } from "react"
 import type { Movie } from "@/lib/types"
+import { useTelegramUser } from "@/lib/hooks/useTelegramUser"
 
 export default function MyLikes() {
   const router = useRouter()
-  const currentUser = useQuery(api.users.getByTelegramId, { telegramId: "123456" })
+  const { currentUser } = useTelegramUser()
+  
   const likedMovies = useQuery(api.movies.listLikedByUser, 
     currentUser?._id ? { userId: currentUser._id } : "skip"
   ) || []

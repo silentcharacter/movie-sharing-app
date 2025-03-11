@@ -10,23 +10,15 @@ import { api } from "@/convex/_generated/api"
 import { Plus, Menu, ChevronLeft } from "lucide-react"
 import { toast } from "sonner"
 import type { Movie } from "@/lib/types"
+import { useTelegramUser } from "@/lib/hooks/useTelegramUser"
 
 export default function Home() {
-  // Get current user data
-  const [isTelegram, setIsTelegram] = useState(false)
-  const [telegramUser, setTelegramUser] = useState<any>(null)
+  const { currentUser, isTelegram } = useTelegramUser()
   const prevMoviesRef = useRef<Movie[]>([])
   const prevActiveGenreRef = useRef<string>("all")
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const router = useRouter()
   const pathname = usePathname()
-  
-  // Update currentUser query to use telegramUser.id after it's available
-  const currentUser = useQuery(
-    api.users.getByTelegramId, 
-    telegramUser ? { telegramId: telegramUser.id.toString() } : "skip"
-  )
-  
   
   const movies = useQuery(api.movies.getUnratedMovies, 
     currentUser?._id ? { userId: currentUser._id } : "skip"
@@ -43,27 +35,6 @@ export default function Home() {
       setOriginalMovies(movies)
     }
   }, [movies, originalMovies.length])
-
-  useEffect(() => {
-    setIsTelegram(false)
-    setTelegramUser({id: "123456", first_name: "Anonymous", last_name: "", username: "@anonymous"})
-    // Check if running in Telegram WebApp
-    if (typeof window !== "undefined" && window.Telegram && window.Telegram.WebApp) {
-      setIsTelegram(true)
-      const webApp = window.Telegram.WebApp
-
-      // Get user data from Telegram
-      if (webApp.initDataUnsafe && webApp.initDataUnsafe.user) {
-        setTelegramUser(webApp.initDataUnsafe.user)
-      }
-
-      // Expand to maximum allowed height
-      webApp.expand()
-
-      // Trigger closing animation when ready
-      webApp.ready()
-    }
-  }, [])
 
   // Update filtered movies only when movies or activeGenre actually change
   useEffect(() => {
@@ -82,12 +53,6 @@ export default function Home() {
     }
   }, [activeGenre, movies])
 
-  const resetMovieList = () => {
-    setFilteredMovies(movies)
-    toast.success("Movie list reset", {
-      description: "All movies have been restored",
-    })
-  }
 
   const onLikeMovie = async (movieId: string, isLike: boolean) => {
     try {

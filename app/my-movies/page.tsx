@@ -10,10 +10,12 @@ import AddMovieForm from "@/components/add-movie-form"
 import { useState, useEffect, useRef } from "react"
 import type { Movie } from "@/lib/types"
 import { toast } from "sonner"
+import { useTelegramUser } from "@/lib/hooks/useTelegramUser"
 
 export default function MyMovies() {
   const router = useRouter()
-  const currentUser = useQuery(api.users.getByTelegramId, { telegramId: "123456" })
+  const { currentUser } = useTelegramUser()
+  
   const myMovies = useQuery(api.movies.listByUser, 
     currentUser?._id ? { userId: currentUser._id } : "skip"
   ) || []
