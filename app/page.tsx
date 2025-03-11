@@ -22,6 +22,7 @@ export default function Home() {
   const [activeGenre, setActiveGenre] = useState<string>("all")
   const [filteredMovies, setFilteredMovies] = useState<Movie[]>([])
   const [isTelegram, setIsTelegram] = useState(false)
+  const [telegramUser, setTelegramUser] = useState<any>(null)
   const prevMoviesRef = useRef<Movie[]>([])
   const prevActiveGenreRef = useRef<string>("all")
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -40,6 +41,11 @@ export default function Home() {
     if (typeof window !== "undefined" && window.Telegram && window.Telegram.WebApp) {
       setIsTelegram(true)
       const webApp = window.Telegram.WebApp
+
+      // Get user data from Telegram
+      if (webApp.initDataUnsafe && webApp.initDataUnsafe.user) {
+        setTelegramUser(webApp.initDataUnsafe.user)
+      }
 
       // Expand to maximum allowed height
       webApp.expand()
@@ -132,6 +138,15 @@ export default function Home() {
       {!isTelegram && (
         <div className="bg-yellow-50 text-yellow-800 p-3 rounded-lg mb-4 text-center text-sm">
           This app works best within the Telegram application.
+        </div>
+      )}
+
+      {isTelegram && telegramUser && (
+        <div className="bg-blue-50 text-blue-800 p-3 rounded-lg mb-4">
+          <h3 className="font-medium">Telegram User Info:</h3>
+          <p>ID: {telegramUser.id}</p>
+          <p>Name: {telegramUser.first_name} {telegramUser.last_name || ''}</p>
+          {telegramUser.username && <p>Username: @{telegramUser.username}</p>}
         </div>
       )}
 
