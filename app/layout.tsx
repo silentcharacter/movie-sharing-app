@@ -2,7 +2,7 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
-// import { ThemeProvider } from "@/components/theme-provider"
+import { ThemeProvider } from "@/components/theme-provider"
 import { ConvexClientProvider } from "./provider";
 import { Toaster } from "sonner"
 
@@ -25,20 +25,16 @@ export default function RootLayout({
       </head>
       
       <body className={inter.className}>
-        {/* <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          {children}
-        </ThemeProvider> */}
-
-        <ConvexClientProvider>
-          {children}
-          <Toaster />
-        </ConvexClientProvider>
-
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          <ConvexClientProvider>
+            {children}
+            <Toaster />
+          </ConvexClientProvider>
+        </ThemeProvider>
       </body>
     </html>
   )
 }
-
 
 
 import './globals.css'
