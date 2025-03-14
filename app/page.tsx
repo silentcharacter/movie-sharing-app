@@ -110,12 +110,6 @@ export default function Home() {
         </div>
       </h1>
 
-      {!isTelegram && (
-        <div className="bg-yellow-50 text-yellow-800 p-3 rounded-lg mb-4 text-center text-sm">
-          This app works best within the Telegram application.
-        </div>
-      )}
-
       {/* TG user info for debugging */}
       {/* {isTelegram && telegramUser && (
         <div className="bg-blue-50 text-blue-800 p-3 rounded-lg mb-4">
