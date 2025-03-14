@@ -28,7 +28,15 @@ export function useTelegramUser() {
 
   useEffect(() => {
     if (telegramUser) {
-      getOrCreateUser({ telegramUser })
+      // Strip down telegramUser to only include necessary properties
+      const strippedUser = {
+        id: telegramUser.id,
+        first_name: telegramUser.first_name,
+        last_name: telegramUser.last_name || "",
+        username: telegramUser.username || ""
+      }
+      
+      getOrCreateUser({ telegramUser: strippedUser })
         .then(user => {
           setCurrentUser(user)
         })
