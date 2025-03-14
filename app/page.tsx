@@ -134,7 +134,7 @@ export default function Home() {
       />
 
       <div className="text-center text-muted-foreground text-sm my-2 p-2 bg-muted/20 rounded-lg">
-        Swipe right to LIKE, swipe left to DISLIKE
+        Swipe right to LIKE, swipe left to DISLIKE. Tap on likes to see who liked it.
       </div>
 
       {filteredMovies.length === 0 ? (

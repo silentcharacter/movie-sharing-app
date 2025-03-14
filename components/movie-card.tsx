@@ -5,7 +5,7 @@ import type React from "react"
 import { useState, useRef, useEffect, type MutableRefObject } from "react"
 import Image from "next/image"
 import type { Movie } from "@/lib/types"
-import { ExternalLink } from "lucide-react"
+import { ExternalLink, X } from "lucide-react"
 
 interface MovieCardProps {
   movie: Movie
@@ -17,8 +17,10 @@ export default function MovieCard({ movie, onLike, activeSwipeRef }: MovieCardPr
   const [swipeOffset, setSwipeOffset] = useState(0)
   const [isDragging, setIsDragging] = useState(false)
   const [isRemoving, setIsRemoving] = useState(false)
+  const [showUsersPopup, setShowUsersPopup] = useState(false)
   const startXRef = useRef(0)
   const cardRef = useRef<HTMLDivElement>(null)
+  const popupRef = useRef<HTMLDivElement>(null)
   
   // Calculate percentages for likes/dislikes bar
   const totalVotes = (movie.likesCount ?? 0) + (movie.dislikesCount ?? 0)
@@ -131,6 +133,28 @@ export default function MovieCard({ movie, onLike, activeSwipeRef }: MovieCardPr
     }
   }, [isDragging, movie.imdbID])
 
+  // Close popup when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (popupRef.current && !popupRef.current.contains(event.target as Node)) {
+        setShowUsersPopup(false)
+      }
+    }
+
+    if (showUsersPopup) {
+      document.addEventListener("mousedown", handleClickOutside)
+    }
+    
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside)
+    }
+  }, [showUsersPopup])
+
+  const toggleUsersPopup = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setShowUsersPopup(!showUsersPopup)
+  }
+
   const cardContent = (
     <div className="bg-muted rounded-xl p-4 shadow-sm hover:shadow-md transition-all relative z-10 flex gap-4">
       <div className="flex flex-col gap-3 w-20 flex-shrink-0">
@@ -149,8 +173,11 @@ export default function MovieCard({ movie, onLike, activeSwipeRef }: MovieCardPr
           />
         </div>
 
-        <div className="h-6 w-full">
-          <div className="flex h-full rounded overflow-hidden">
+        <div className="h-6 w-full relative">
+          <div 
+            className="flex h-full rounded overflow-hidden cursor-pointer"
+            onClick={toggleUsersPopup}
+          >
             <div
               className="bg-green-100 text-green-800 flex items-center justify-center text-xs font-bold"
               style={{ width: `${likesPercentage}%`, minWidth: "24px" }}
@@ -164,6 +191,65 @@ export default function MovieCard({ movie, onLike, activeSwipeRef }: MovieCardPr
               {movie.dislikesCount}
             </div>
           </div>
+          
+          {/* Users Popup */}
+          {showUsersPopup && (
+            <div 
+              ref={popupRef}
+              className="absolute bottom-8 left-0 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-3 z-50 w-64 border border-gray-200 dark:border-gray-700"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex justify-between items-center mb-2">
+                <h4 className="font-semibold text-sm">Who rated this movie</h4>
+                <button 
+                  onClick={() => setShowUsersPopup(false)}
+                  className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+              
+              <div className="flex gap-4">
+                {/* Likes column */}
+                <div className="flex-1">
+                  <div className="text-xs font-medium text-green-600 mb-1 flex items-center gap-1">
+                    <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                    Liked ({movie.likedByUsers?.length || 0})
+                  </div>
+                  <ul className="text-xs max-h-32 overflow-y-auto">
+                    {movie.likedByUsers && movie.likedByUsers.length > 0 ? (
+                      movie.likedByUsers.map((user, i) => (
+                        <li key={`like-${i}`} className="py-1 border-b border-gray-100 dark:border-gray-700 last:border-0">
+                          {user.name}
+                        </li>
+                      ))
+                    ) : (
+                      <li className="text-gray-500 italic">No likes yet</li>
+                    )}
+                  </ul>
+                </div>
+                
+                {/* Dislikes column */}
+                <div className="flex-1">
+                  <div className="text-xs font-medium text-red-600 mb-1 flex items-center gap-1">
+                    <span className="w-2 h-2 bg-red-500 rounded-full"></span>
+                    Disliked ({movie.dislikedByUsers?.length || 0})
+                  </div>
+                  <ul className="text-xs max-h-32 overflow-y-auto">
+                    {movie.dislikedByUsers && movie.dislikedByUsers.length > 0 ? (
+                      movie.dislikedByUsers.map((user, i) => (
+                        <li key={`dislike-${i}`} className="py-1 border-b border-gray-100 dark:border-gray-700 last:border-0">
+                          {user.name}
+                        </li>
+                      ))
+                    ) : (
+                      <li className="text-gray-500 italic">No dislikes yet</li>
+                    )}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

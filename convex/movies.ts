@@ -1,13 +1,6 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
-// Get all movies from the database
-export const getAll = query({
-  args: {},
-  handler: async (ctx) => {
-    return await ctx.db.query("movies").collect();
-  },
-});
 
 // Check if a movie with the given imdbID already exists
 export const getByImdbId = query({
@@ -101,6 +94,57 @@ export const likeMovie = mutation({
   },
 });
 
+// Helper function to populate movie with users who liked/disliked it
+async function populateMovieWithUsers(
+  ctx: any, 
+  movie: any
+) {
+  // Get all positive likes for this movie
+  const movieLikes = await ctx.db
+    .query("likes")
+    .withIndex("by_movie_positive", (q: any) => 
+      q.eq("movieId", movie._id).eq("positive", true)
+    )
+    .collect();
+  
+  // Get all negative likes (dislikes) for this movie
+  const movieDislikes = await ctx.db
+    .query("likes")
+    .withIndex("by_movie_positive", (q: any) => 
+      q.eq("movieId", movie._id).eq("positive", false)
+    )
+    .collect();
+  
+  // Get the user IDs from the likes and dislikes
+  const likeUserIds = movieLikes.map((like: any) => like.userId);
+  const dislikeUserIds = movieDislikes.map((dislike: any) => dislike.userId);
+  
+  // Fetch all the users who liked this movie
+  const likedByUsers = await Promise.all(
+    likeUserIds.map(async (userId: any) => {
+      const user = await ctx.db.get(userId);
+      // Only return the name field if user exists
+      return user ? { name: user.name } : null;
+    })
+  );
+  
+  // Fetch all the users who disliked this movie
+  const dislikedByUsers = await Promise.all(
+    dislikeUserIds.map(async (userId: any) => {
+      const user = await ctx.db.get(userId);
+      // Only return the name field if user exists
+      return user ? { name: user.name } : null;
+    })
+  );
+  
+  // Return the movie with the users who liked/disliked it
+  return {
+    ...movie,
+    likedByUsers: likedByUsers.filter(user => user !== null),
+    dislikedByUsers: dislikedByUsers.filter(user => user !== null)
+  };
+}
+
 // Get all movies that haven't been rated by the specified user
 export const getUnratedMovies = query({
   args: { userId: v.id("users") },
@@ -118,7 +162,10 @@ export const getUnratedMovies = query({
     const ratedMovieIds = new Set(userLikes.map(like => like.movieId));
     
     // Filter out movies that the user has already rated
-    return allMovies.filter(movie => !ratedMovieIds.has(movie._id));
+    const unratedMovies = allMovies.filter(movie => !ratedMovieIds.has(movie._id));
+    
+    // For each unrated movie, populate with user information
+    return Promise.all(unratedMovies.map(movie => populateMovieWithUsers(ctx, movie)));
   },
 });
 
@@ -129,10 +176,14 @@ export const listByUser = query({
     const { userId } = args;
     if (!userId) return [];
     
-    return await ctx.db
+    // Get movies suggested by this user
+    const movies = await ctx.db
       .query("movies")
       .filter((q) => q.eq(q.field("suggestedBy"), userId))
       .collect();
+    
+    // Populate each movie with user information
+    return Promise.all(movies.map(movie => populateMovieWithUsers(ctx, movie)));
   },
 });
 
@@ -163,6 +214,9 @@ export const listLikedByUser = query({
     );
     
     // Filter out any null values (in case a movie was deleted)
-    return movies.filter(movie => movie !== null);
+    const validMovies = movies.filter(movie => movie !== null);
+    
+    // Populate each movie with user information
+    return Promise.all(validMovies.map(movie => populateMovieWithUsers(ctx, movie)));
   },
 }); 

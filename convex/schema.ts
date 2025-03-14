@@ -36,5 +36,6 @@ export default defineSchema({
   })
     .index("by_user", ["userId"])
     .index("by_movie", ["movieId"])
-    .index("by_user_positive", ["userId", "positive"]),
+    .index("by_user_positive", ["userId", "positive"])
+    .index("by_movie_positive", ["movieId", "positive"]),
 });
