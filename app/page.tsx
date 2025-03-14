@@ -20,9 +20,12 @@ export default function Home() {
   const router = useRouter()
   const pathname = usePathname()
   
+  // Add isLoading state to track when the query is loading
+  const [isLoading, setIsLoading] = useState(true)
+  
   const movies = useQuery(api.movies.getUnratedMovies, 
     currentUser?._id ? { userId: currentUser._id } : "skip"
-  ) || []
+  ) || [{}]
   
   const likeMovie = useMutation(api.movies.likeMovie)
   const [originalMovies, setOriginalMovies] = useState<Movie[]>([])
@@ -34,6 +37,10 @@ export default function Home() {
     if (movies.length > 0 && originalMovies.length === 0) {
       setOriginalMovies(movies)
     }
+
+    if (movies.length === 0 || movies[0].imdbID) {
+      setIsLoading(false)
+    }
   }, [movies, originalMovies.length])
 
   // Update filtered movies only when movies or activeGenre actually change
@@ -42,12 +49,13 @@ export default function Home() {
     const genreChanged = prevActiveGenreRef.current !== activeGenre
     
     if (moviesChanged || genreChanged) {
+      // Filter out empty objects first
+      const validMovies = movies.filter(movie => movie.imdbID)
       if (activeGenre === "all") {
-        setFilteredMovies(movies)
+        setFilteredMovies(validMovies)
       } else {
-        setFilteredMovies(movies.filter((movie) => movie.genre.toLowerCase().includes(activeGenre.toLowerCase())))
+        setFilteredMovies(validMovies.filter((movie) => movie.genre.toLowerCase().includes(activeGenre.toLowerCase())))
       }
-      
       prevMoviesRef.current = movies
       prevActiveGenreRef.current = activeGenre
     }
@@ -131,7 +139,11 @@ export default function Home() {
         Swipe right to LIKE, swipe left to DISLIKE. Tap on likes to see who liked it.
       </div>
 
-      {filteredMovies.length === 0 ? (
+      {isLoading ? (
+        <div className="flex justify-center items-center py-20">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        </div>
+      ) : filteredMovies.length === 0 ? (
         <div className="text-center py-10 text-muted-foreground">
           <p>
             {activeGenre !== "all" ? `No movies found in the "${activeGenre}" genre` : "No more recommendations"}

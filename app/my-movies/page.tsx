@@ -16,9 +16,11 @@ export default function MyMovies() {
   const router = useRouter()
   const { currentUser } = useTelegramUser()
   
+  const [isLoading, setIsLoading] = useState(true)
+  
   const myMovies = useQuery(api.movies.listByUser, 
     currentUser?._id ? { userId: currentUser._id } : "skip"
-  ) || []
+  ) || [{}]
   const addNewMovie = useMutation(api.movies.add)
 
   const [activeGenre, setActiveGenre] = useState<string>("all")
@@ -33,16 +35,23 @@ export default function MyMovies() {
     const genreChanged = prevActiveGenreRef.current !== activeGenre
     
     if (moviesChanged || genreChanged) {
+      // Filter out empty objects first
+      const validMovies = myMovies.filter(movie => movie.imdbID)
+      
       if (activeGenre === "all") {
-        setFilteredMovies(myMovies)
+        setFilteredMovies(validMovies)
       } else {
-        setFilteredMovies(myMovies.filter((movie) => 
+        setFilteredMovies(validMovies.filter((movie) => 
           movie.genre.toLowerCase().includes(activeGenre.toLowerCase())
         ))
       }
       
       prevMoviesRef.current = myMovies
       prevActiveGenreRef.current = activeGenre
+
+      if (myMovies.length === 0 || myMovies[0].imdbID) {
+        setIsLoading(false)
+      }
     }
   }, [activeGenre, myMovies])
 
@@ -116,7 +125,11 @@ export default function MyMovies() {
         <Plus size={24} />
       </button>
 
-      {myMovies.length === 0 ? (
+      {isLoading ? (
+        <div className="flex justify-center items-center py-20">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        </div>
+      ) : myMovies.length === 0 ? (
         <p className="text-muted-foreground text-center py-8">
           You haven't suggested any movies yet. Go back to the main page to suggest your first movie!
         </p>

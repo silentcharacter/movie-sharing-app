@@ -14,9 +14,12 @@ export default function MyLikes() {
   const router = useRouter()
   const { currentUser } = useTelegramUser()
   
+  // Add isLoading state
+  const [isLoading, setIsLoading] = useState(true)
+  
   const likedMovies = useQuery(api.movies.listLikedByUser, 
     currentUser?._id ? { userId: currentUser._id } : "skip"
-  ) || []
+  ) || [{}]
 
   const [activeGenre, setActiveGenre] = useState<string>("all")
   const [filteredMovies, setFilteredMovies] = useState<Movie[]>([])
@@ -29,16 +32,22 @@ export default function MyLikes() {
     const genreChanged = prevActiveGenreRef.current !== activeGenre
     
     if (moviesChanged || genreChanged) {
+      const validMovies = likedMovies.filter(movie => movie.imdbID)
+
       if (activeGenre === "all") {
-        setFilteredMovies(likedMovies)
+        setFilteredMovies(validMovies)
       } else {
-        setFilteredMovies(likedMovies.filter((movie) => 
+        setFilteredMovies(validMovies.filter((movie) => 
           movie.genre.toLowerCase().includes(activeGenre.toLowerCase())
         ))
       }
       
       prevMoviesRef.current = likedMovies
       prevActiveGenreRef.current = activeGenre
+
+      if (likedMovies.length === 0 || likedMovies[0].imdbID) {
+        setIsLoading(false)
+      }
     }
   }, [activeGenre, likedMovies])
 
@@ -55,7 +64,11 @@ export default function MyLikes() {
         <span>My Likes</span>
       </h1>
 
-      {likedMovies.length === 0 ? (
+      {isLoading ? (
+        <div className="flex justify-center items-center py-20">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        </div>
+      ) : likedMovies.length === 0 ? (
         <p className="text-muted-foreground text-center py-8">
           You haven't liked any movies yet. Go back to the main page to like some movies!
         </p>
